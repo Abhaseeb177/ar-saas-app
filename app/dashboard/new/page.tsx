@@ -43,7 +43,13 @@ export default function NewDishPage() {
       return
     }
 
-    const fileName = `${user.id}/${Date.now()}.glb`
+    const safeName = title
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '')
+
+    const fileName = `${user.id}/${safeName}-${Date.now()}.glb`
 
     const { error: uploadError } = await supabase.storage
       .from('dish-models')
