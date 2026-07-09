@@ -1,0 +1,169 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase'
+import Navbar from '@/components/Navbar'
+import QRCodeCard from '@/components/QRCodeCard'
+
+type Project = {
+  id: string
+  title: string
+  file_type: string | null
+  qr_code_url: string | null
+  created_at: string
+}
+
+type Profile = {
+  email: string
+  plan: string
+  scan_limit: number
+}
+
+export default function DashboardPage() {
+  const [profile, setProfile] = useState<Profile | null>(null)
+  const [projects, setProjects] = useState<Project[]>([])
+  const [loading, setLoading] = useState(true)
+  const [qrProject, setQrProject] = useState<Project | null>(null)
+  const router = useRouter()
+
+  useEffect(() => {
+    const loadData = async () => {
+      const supabase = createClient()
+
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (!user) {
+        router.push('/login')
+        return
+      }
+
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('email, plan, scan_limit')
+        .eq('id', user.id)
+        .single()
+
+      const { data: projectsData } = await supabase
+        .from('projects')
+        .select('id, title, file_type, qr_code_url, created_at')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+
+      setProfile(profileData)
+      setProjects(projectsData || [])
+      setLoading(false)
+    }
+
+    loadData()
+  }, [router])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-neutral-950 flex items-center justify-center">
+        <p className="text-neutral-500">Loading your dashboard...</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-neutral-950">
+      <Navbar email={profile?.email || ''} />
+
+      <main className="max-w-6xl mx-auto px-6 py-10">
+        {/* Header row */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-white">Your Menu Items</h1>
+            <p className="text-neutral-400 mt-1">
+              Manage your AR dishes and their QR codes
+            </p>
+          </div>
+
+          <button
+            onClick={() => router.push('/dashboard/new')}
+            className="bg-orange-500 hover:bg-orange-400 text-black font-semibold px-5 py-2.5 rounded-full transition shadow-lg shadow-orange-500/20 whitespace-nowrap"
+          >
+            + Add New Dish
+          </button>
+        </div>
+
+        {/* Plan card */}
+        <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-5 mb-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <p className="text-neutral-400 text-sm">Current Plan</p>
+            <p className="text-white font-semibold text-lg capitalize">
+              {profile?.plan || 'free'}
+            </p>
+          </div>
+          <div className="sm:text-right">
+            <p className="text-neutral-400 text-sm">Monthly Scan Limit</p>
+            <p className="text-white font-semibold text-lg">
+              {profile?.scan_limit ?? 100} scans
+            </p>
+          </div>
+          {profile?.plan === 'free' && (
+            <button className="bg-white text-black text-sm font-semibold px-4 py-2 rounded-full hover:bg-neutral-200 transition">
+              Upgrade to Premium
+            </button>
+          )}
+        </div>
+
+        {/* Projects grid */}
+        {projects.length === 0 ? (
+          <div className="border border-dashed border-neutral-800 rounded-2xl py-20 text-center">
+            <p className="text-5xl mb-4">🍔</p>
+            <p className="text-white font-medium text-lg">No dishes yet</p>
+            <p className="text-neutral-500 mt-1">
+              Add your first AR dish to generate its QR code
+            </p>
+            <button
+              onClick={() => router.push('/dashboard/new')}
+              className="mt-6 bg-orange-500 hover:bg-orange-400 text-black font-semibold px-5 py-2.5 rounded-full transition"
+            >
+              + Add New Dish
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                {projects.map((project) => (
+              <div
+                key={project.id}
+                onClick={() => setQrProject(project)}
+                className="bg-neutral-900 border border-neutral-800 rounded-2xl p-5 hover:border-neutral-600 transition cursor-pointer"
+              >
+                <div className="w-full h-36 bg-neutral-800 rounded-xl flex items-center justify-center mb-4">
+                  <span className="text-4xl">
+                    {project.file_type === 'model' ? '🧊' : '🖼️'}
+                  </span>
+                </div>
+                <h3 className="text-white font-semibold truncate">{project.title}</h3>
+                <p className="text-neutral-500 text-sm mt-1">
+                  {new Date(project.created_at).toLocaleDateString()}
+                </p>
+                <p className="text-orange-400 text-xs mt-2">Tap to view QR code →</p>
+              </div>
+            ))}
+          </div>
+        )}
+      </main>
+
+      {qrProject && (
+        <div
+          onClick={() => setQrProject(null)}
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 px-6"
+        >
+          <div onClick={(e) => e.stopPropagation()} className="w-full max-w-sm">
+            <QRCodeCard projectId={qrProject.id} title={qrProject.title} />
+            <button
+              onClick={() => setQrProject(null)}
+              className="mt-4 w-full text-neutral-400 hover:text-white text-sm"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
