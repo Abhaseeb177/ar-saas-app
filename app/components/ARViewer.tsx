@@ -3,23 +3,18 @@
 import { useEffect } from 'react'
 import '@google/model-viewer'
 
-declare global {
-  namespace JSX {
-    interface IntrinsicElements {
-      'model-viewer': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & {
-        src?: string
-        alt?: string
-        ar?: boolean
-        'ar-modes'?: string
-        'camera-controls'?: boolean
-        'auto-rotate'?: boolean
-        'shadow-intensity'?: string
-        exposure?: string
-        poster?: string
-      }
-    }
-  }
-}
+const ModelViewer = 'model-viewer' as unknown as React.FC<{
+  src: string
+  alt: string
+  ar?: boolean
+  'ar-modes'?: string
+  'camera-controls'?: boolean
+  'auto-rotate'?: boolean
+  'shadow-intensity'?: string
+  exposure?: string
+  style?: React.CSSProperties
+  children?: React.ReactNode
+}>
 
 export default function ARViewer({ modelUrl, title }: { modelUrl: string; title: string }) {
   useEffect(() => {
@@ -28,8 +23,7 @@ export default function ARViewer({ modelUrl, title }: { modelUrl: string; title:
 
   return (
     <div className="relative w-screen h-screen bg-neutral-950 overflow-hidden">
-      {/* @ts-expect-error - model-viewer is a web component */}
-      <model-viewer
+      <ModelViewer
         src={modelUrl}
         alt={title}
         ar
@@ -59,7 +53,7 @@ export default function ARViewer({ modelUrl, title }: { modelUrl: string; title:
         >
           👁️ View in your space
         </button>
-      </model-viewer>
+      </ModelViewer>
 
       <div className="absolute top-0 left-0 right-0 p-5 bg-gradient-to-b from-black/70 to-transparent pointer-events-none">
         <p className="text-white font-semibold text-lg">{title}</p>
