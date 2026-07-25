@@ -16,48 +16,82 @@ const ModelViewer = 'model-viewer' as unknown as React.FC<{
   children?: React.ReactNode
 }>
 
-export default function ARViewer({ modelUrl, title }: { modelUrl: string; title: string }) {
+export default function ARViewer({
+  modelUrl,
+  title,
+  description,
+  price,
+  restaurantName,
+  phoneNumber,
+}: {
+  modelUrl: string
+  title: string
+  description: string | null
+  price: number | null
+  restaurantName: string
+  phoneNumber: string
+}) {
   useEffect(() => {
     document.body.style.margin = '0'
+    document.body.style.backgroundColor = '#ffffff'
   }, [])
 
   return (
-    <div className="relative w-screen h-screen bg-neutral-950 overflow-hidden">
-      <ModelViewer
-        src={modelUrl}
-        alt={title}
-        ar
-        ar-modes="scene-viewer webxr quick-look"
-        camera-controls
-        auto-rotate
-        shadow-intensity="1"
-        exposure="1"
-        style={{ width: '100%', height: '100%', backgroundColor: '#0a0a0a' }}
-      >
-        <button
-          slot="ar-button"
-          style={{
-            position: 'absolute',
-            bottom: '24px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            background: '#f97316',
-            color: 'black',
-            fontWeight: 600,
-            border: 'none',
-            borderRadius: '9999px',
-            padding: '12px 28px',
-            fontSize: '15px',
-            cursor: 'pointer',
-          }}
-        >
-          👁️ View in your space
-        </button>
-      </ModelViewer>
+    <div className="min-h-screen bg-white flex flex-col">
+      {/* Header */}
+      <header className="border-b border-neutral-200 py-5 px-6 text-center">
+        <h1 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-black">
+          {restaurantName}
+        </h1>
+      </header>
 
-      <div className="absolute top-0 left-0 right-0 p-5 bg-gradient-to-b from-black/70 to-transparent pointer-events-none">
-        <p className="text-white font-semibold text-lg">{title}</p>
-      </div>
+      <main className="flex-1 max-w-2xl mx-auto w-full px-5 py-8">
+        {/* Dish title + price */}
+        <div className="flex items-start justify-between gap-4 mb-6">
+          <h2 className="text-2xl sm:text-3xl font-black uppercase text-black leading-tight">
+            {title}
+          </h2>
+          {price !== null && (
+            <span className="text-2xl sm:text-3xl font-black text-black whitespace-nowrap">
+              {price} <span className="text-sm font-bold text-neutral-500">AED</span>
+            </span>
+          )}
+        </div>
+
+        {description && (
+          <p className="text-neutral-600 text-sm mb-6 leading-relaxed">{description}</p>
+        )}
+
+        {/* AR / 3D Viewer card */}
+        <div className="rounded-2xl border border-neutral-200 bg-neutral-50 overflow-hidden mb-4">
+          <ModelViewer
+            src={modelUrl}
+            alt={title}
+            ar
+            ar-modes="scene-viewer webxr quick-look"
+            camera-controls
+            auto-rotate
+            shadow-intensity="1"
+            exposure="1"
+            style={{ width: '100%', height: '420px', backgroundColor: 'transparent' }}
+          />
+        </div>
+
+        <p className="text-center text-neutral-500 text-sm mb-10">
+          Drag to rotate &middot; Tap the AR icon in the viewer to place it on your table
+        </p>
+
+        {/* Order Now button */}
+        
+          href={`tel:${phoneNumber}`}
+          className="flex items-center justify-center gap-2 w-full bg-black hover:bg-neutral-800 text-white font-bold uppercase tracking-wide py-4 rounded-full transition"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
+          </svg>
+          Order Now
+        </a>
+      </main>
     </div>
   )
 }

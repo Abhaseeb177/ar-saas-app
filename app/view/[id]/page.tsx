@@ -9,7 +9,7 @@ async function getProject(id: string) {
 
   const { data } = await supabase
     .from('projects')
-    .select('title, file_url, file_type')
+    .select('title, description, file_url, file_type, price, phone_number')
     .eq('id', id)
     .single()
 
@@ -22,11 +22,20 @@ export default async function ViewPage({ params }: { params: Promise<{ id: strin
 
   if (!project) {
     return (
-      <div className="min-h-screen bg-neutral-950 flex items-center justify-center text-white">
+      <div className="min-h-screen bg-white flex items-center justify-center text-black">
         Dish not found.
       </div>
     )
   }
 
-  return <ARViewer modelUrl={project.file_url} title={project.title} />
+  return (
+    <ARViewer
+      modelUrl={project.file_url}
+      title={project.title}
+      description={project.description}
+      price={project.price}
+      restaurantName="FIVE ▶ JUMEIRAH VILLAGE"
+      phoneNumber={project.phone_number || '+971581009771'}
+    />
+  )
 }
