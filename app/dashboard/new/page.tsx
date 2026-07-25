@@ -53,7 +53,9 @@ export default function NewDishPage() {
 
     const { error: uploadError } = await supabase.storage
       .from('dish-models')
-      .upload(fileName, file)
+      .upload(fileName, file, {
+        contentType: 'model/gltf-binary',
+      })
 
     if (uploadError) {
       setError(uploadError.message)
