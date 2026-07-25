@@ -38,7 +38,6 @@ export default function ARViewer({
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      {/* Header */}
       <header className="border-b border-neutral-200 py-5 px-6 text-center">
         <h1 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-black">
           {restaurantName}
@@ -46,7 +45,6 @@ export default function ARViewer({
       </header>
 
       <main className="flex-1 max-w-2xl mx-auto w-full px-5 py-8">
-        {/* Dish title + price */}
         <div className="flex items-start justify-between gap-4 mb-6">
           <h2 className="text-2xl sm:text-3xl font-black uppercase text-black leading-tight">
             {title}
@@ -62,7 +60,6 @@ export default function ARViewer({
           <p className="text-neutral-600 text-sm mb-6 leading-relaxed">{description}</p>
         )}
 
-        {/* AR / 3D Viewer card */}
         <div className="rounded-2xl border border-neutral-200 bg-neutral-50 overflow-hidden mb-4">
           <ModelViewer
             src={modelUrl}
@@ -78,18 +75,14 @@ export default function ARViewer({
         </div>
 
         <p className="text-center text-neutral-500 text-sm mb-10">
-          Drag to rotate &middot; Tap the AR icon in the viewer to place it on your table
+          Drag to rotate, or tap the AR icon in the viewer to place it on your table.
         </p>
 
-        {/* Order Now button */}
-        
-          href={`tel:${phoneNumber}`}
-          className="flex items-center justify-center gap-2 w-full bg-black hover:bg-neutral-800 text-white font-bold uppercase tracking-wide py-4 rounded-full transition"
-        >
+        <a href={'tel:' + phoneNumber} className="flex items-center justify-center gap-2 w-full bg-black hover:bg-neutral-800 text-white font-bold uppercase tracking-wide py-4 rounded-full transition">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
           </svg>
-          Order Now
+          <span>Order Now</span>
         </a>
       </main>
     </div>

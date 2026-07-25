@@ -35,7 +35,7 @@ export default async function ViewPage({ params }: { params: Promise<{ id: strin
       description={project.description}
       price={project.price}
       restaurantName="FIVE ▶ JUMEIRAH VILLAGE"
-      phoneNumber={project.phone_number || '+971581009771'}
+      phoneNumber={project.phone_number || '+971564651875'}
     />
   )
 }
