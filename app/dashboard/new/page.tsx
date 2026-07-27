@@ -263,7 +263,7 @@ export default function NewDishPage() {
               3D model file (.glb) — optional
             </label>
             <p className="text-neutral-500 text-xs mb-2">
-              If you skip this, we & apos;ll automatically create a floating photo card from your dish photo instead.
+              If you skip this, we&apos;ll automatically create a floating photo card from your dish photo instead.
             </p>
 
             {modelFile ? (
