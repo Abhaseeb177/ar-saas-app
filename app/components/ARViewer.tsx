@@ -12,6 +12,10 @@ const ModelViewer = 'model-viewer' as unknown as React.FC<{
   'auto-rotate'?: boolean
   'shadow-intensity'?: string
   exposure?: string
+  'field-of-view'?: string
+  'camera-orbit'?: string
+  'interaction-prompt'?: string
+  scale?: string
   style?: React.CSSProperties
   children?: React.ReactNode
 }>
@@ -23,6 +27,7 @@ export default function ARViewer({
   price,
   restaurantName,
   phoneNumber,
+  modelScale,
 }: {
   modelUrl: string
   title: string
@@ -30,7 +35,9 @@ export default function ARViewer({
   price: number | null
   restaurantName: string
   phoneNumber: string
+  modelScale: number
 }) {
+  const scaleValue = `${modelScale} ${modelScale} ${modelScale}`
   useEffect(() => {
     document.body.style.margin = '0'
     document.body.style.backgroundColor = '#ffffff'
@@ -67,10 +74,18 @@ export default function ARViewer({
             ar
             ar-modes="scene-viewer webxr quick-look"
             camera-controls
-            auto-rotate
             shadow-intensity="1"
             exposure="1"
-            style={{ width: '100%', height: '420px', backgroundColor: 'transparent' }}
+            field-of-view="30deg"
+            camera-orbit="0deg 75deg 105%"
+            interaction-prompt="none"
+            scale={scaleValue}
+            style={{
+              width: '100%',
+              height: '420px',
+              backgroundColor: 'transparent',
+              touchAction: 'none',
+            }}
           />
         </div>
 

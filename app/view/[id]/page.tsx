@@ -9,7 +9,7 @@ async function getProject(id: string) {
 
   const { data } = await supabase
     .from('projects')
-    .select('title, description, file_url, file_type, price, phone_number')
+    .select('title, description, file_url, file_type, price, phone_number, model_scale')
     .eq('id', id)
     .single()
 
@@ -36,6 +36,7 @@ export default async function ViewPage({ params }: { params: Promise<{ id: strin
       price={project.price}
       restaurantName="FIVE ▶ JUMEIRAH VILLAGE"
       phoneNumber={project.phone_number || '+971564651875'}
+      modelScale={project.model_scale || 1}
     />
   )
 }
