@@ -27,6 +27,13 @@ export default function DashboardPage() {
   const [projects, setProjects] = useState<Project[]>([])
   const [loading, setLoading] = useState(true)
   const [qrProject, setQrProject] = useState<Project | null>(null)
+  useEffect(() => {
+    const handlePopState = () => {
+      setQrProject(null)
+    }
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [])
   const router = useRouter()
 
   useEffect(() => {
@@ -131,7 +138,10 @@ export default function DashboardPage() {
                 {projects.map((project) => (
               <div
                 key={project.id}
-                onClick={() => setQrProject(project)}
+                onClick={() => {
+                  window.history.pushState({ modal: true }, '')
+                  setQrProject(project)
+                }}
                 className="bg-neutral-900 border border-neutral-800 rounded-2xl p-5 hover:border-neutral-600 transition cursor-pointer"
               >
                 <div className="w-full h-36 bg-neutral-800 rounded-xl flex items-center justify-center mb-4 overflow-hidden">
@@ -160,7 +170,7 @@ export default function DashboardPage() {
 
       {qrProject && (
         <div
-          onClick={() => setQrProject(null)}
+          onClick={() => window.history.back()}
           className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 px-6"
         >
           <div onClick={(e) => e.stopPropagation()} className="w-full max-w-sm">
@@ -203,7 +213,7 @@ export default function DashboardPage() {
             </div>
 
             <button
-              onClick={() => setQrProject(null)}
+              onClick={() => window.history.back()}
               className="mt-4 w-full text-neutral-400 hover:text-white text-sm"
             >
               Close
