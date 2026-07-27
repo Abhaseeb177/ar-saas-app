@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import Navbar from '@/components/Navbar'
 import QRCodeCard from '@/components/QRCodeCard'
+import CategoryManager, { Category } from '@/components/CategoryManager'
 
 type Project = {
   id: string
@@ -14,6 +15,7 @@ type Project = {
   created_at: string
   model_scale?: number
   photo_url?: string | null
+  category_id?: string | null
 }
 
 type Profile = {
@@ -29,6 +31,8 @@ export default function DashboardPage() {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [projects, setProjects] = useState<Project[]>([])
   const [totalScans, setTotalScans] = useState(0)
+  const [categories, setCategories] = useState<Category[]>([])
+  const [activeCategory, setActiveCategory] = useState<string | 'all'>('all')
   const [loading, setLoading] = useState(true)
   const [qrProject, setQrProject] = useState<Project | null>(null)
   useEffect(() => {
@@ -59,9 +63,17 @@ export default function DashboardPage() {
 
       const { data: projectsData } = await supabase
         .from('projects')
-        .select('id, title, file_type, qr_code_url, created_at, model_scale, photo_url')
+        .select('id, title, file_type, qr_code_url, created_at, model_scale, photo_url, category_id')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
+
+      const { data: categoriesData } = await supabase
+        .from('categories')
+        .select('id, name, sort_order')
+        .eq('user_id', user.id)
+        .order('sort_order', { ascending: true })
+
+      setCategories(categoriesData || [])
 
       // Count total scans across all of this user's dishes
       let scanCount = 0
@@ -113,6 +125,36 @@ export default function DashboardPage() {
           </button>
         </div>
 
+        <CategoryManager categories={categories} onChange={setCategories} />
+
+        {categories.length > 0 && (
+          <div className="flex gap-2 overflow-x-auto pb-2 mb-6 -mx-1 px-1">
+            <button
+              onClick={() => setActiveCategory('all')}
+              className={`px-4 py-1.5 rounded-full text-sm font-semibold whitespace-nowrap transition ${
+                activeCategory === 'all'
+                  ? 'bg-orange-500 text-black'
+                  : 'bg-neutral-900 text-neutral-400 border border-neutral-800'
+              }`}
+            >
+              All
+            </button>
+            {categories.map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => setActiveCategory(cat.id)}
+                className={`px-4 py-1.5 rounded-full text-sm font-semibold whitespace-nowrap transition ${
+                  activeCategory === cat.id
+                    ? 'bg-orange-500 text-black'
+                    : 'bg-neutral-900 text-neutral-400 border border-neutral-800'
+                }`}
+              >
+                {cat.name}
+              </button>
+            ))}
+          </div>
+        )}
+
         {/* Plan card */}
         <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-5 mb-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
@@ -135,7 +177,12 @@ export default function DashboardPage() {
         </div>
 
         {/* Projects grid */}
-        {projects.length === 0 ? (
+        {(() => {
+          const filteredProjects = activeCategory === 'all'
+            ? projects
+            : projects.filter((p) => p.category_id === activeCategory)
+
+          return filteredProjects.length === 0 ? (
           <div className="border border-dashed border-neutral-800 rounded-2xl py-20 text-center">
             <p className="text-5xl mb-4">🍔</p>
             <p className="text-white font-medium text-lg">No dishes yet</p>
@@ -181,7 +228,8 @@ export default function DashboardPage() {
               </div>
             ))}
           </div>
-        )}
+          )
+        })()}
       </main>
 
       {qrProject && (

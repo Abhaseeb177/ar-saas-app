@@ -1,15 +1,31 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { friendlyError } from '@/lib/errors'
 import Navbar from '@/components/Navbar'
 
 export default function NewDishPage() {
+  useEffect(() => {
+    const loadCategories = async () => {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      const { data } = await supabase
+        .from('categories')
+        .select('id, name')
+        .eq('user_id', user.id)
+        .order('sort_order', { ascending: true })
+      setCategories(data || [])
+    }
+    loadCategories()
+  }, [])
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [price, setPrice] = useState('')
+  const [categoryId, setCategoryId] = useState('')
+  const [categories, setCategories] = useState<{ id: string; name: string }[]>([])
   const [photo, setPhoto] = useState<File | null>(null)
   const [photoPreview, setPhotoPreview] = useState<string | null>(null)
   const [modelFile, setModelFile] = useState<File | null>(null)
@@ -109,6 +125,7 @@ export default function NewDishPage() {
         file_url: modelUrlData.publicUrl,
         photo_url: photoUrl,
         file_type: 'model',
+        category_id: categoryId || null,
       })
 
     setUploading(false)
@@ -175,6 +192,21 @@ export default function NewDishPage() {
               onChange={(e) => setPrice(e.target.value)}
               className="w-full px-4 py-3 rounded-xl bg-neutral-900 border border-neutral-800 text-white placeholder-neutral-600 focus:outline-none focus:border-orange-500 transition"
             />
+          </div>
+
+          {/* Category */}
+          <div>
+            <label className="block text-sm text-neutral-300 mb-2">Category — optional</label>
+            <select
+              value={categoryId}
+              onChange={(e) => setCategoryId(e.target.value)}
+              className="w-full px-4 py-3 rounded-xl bg-neutral-900 border border-neutral-800 text-white focus:outline-none focus:border-orange-500 transition"
+            >
+              <option value="">No category</option>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.id}>{cat.name}</option>
+              ))}
+            </select>
           </div>
 
           {/* Photo upload */}
