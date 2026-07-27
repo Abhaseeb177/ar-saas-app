@@ -12,6 +12,7 @@ type Project = {
   file_type: string | null
   qr_code_url: string | null
   created_at: string
+  model_scale?: number
 }
 
 type Profile = {
@@ -46,7 +47,7 @@ export default function DashboardPage() {
 
       const { data: projectsData } = await supabase
         .from('projects')
-        .select('id, title, file_type, qr_code_url, created_at')
+        .select('id, title, file_type, qr_code_url, created_at, model_scale')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
 
@@ -155,6 +156,43 @@ export default function DashboardPage() {
         >
           <div onClick={(e) => e.stopPropagation()} className="w-full max-w-sm">
             <QRCodeCard projectId={qrProject.id} title={qrProject.title} />
+
+            <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-5 mt-4">
+              <label className="block text-sm text-neutral-300 mb-2">
+                AR Model Size: {(qrProject.model_scale ?? 1).toFixed(2)}x
+              </label>
+              <input
+                type="range"
+                min="0.1"
+                max="3"
+                step="0.05"
+                value={qrProject.model_scale ?? 1}
+                onChange={(e) => {
+                  const newScale = parseFloat(e.target.value)
+                  setQrProject({ ...qrProject, model_scale: newScale })
+                }}
+                className="w-full accent-orange-500"
+              />
+              <p className="text-neutral-500 text-xs mt-2">
+                Adjust if the dish looks too big or too small on the real table in AR.
+              </p>
+              <button
+                onClick={async () => {
+                  const supabase = createClient()
+                  await supabase
+                    .from('projects')
+                    .update({ model_scale: qrProject.model_scale ?? 1 })
+                    .eq('id', qrProject.id)
+                  setProjects(projects.map(p =>
+                    p.id === qrProject.id ? { ...p, model_scale: qrProject.model_scale ?? 1 } : p
+                  ))
+                }}
+                className="mt-3 w-full bg-orange-500 hover:bg-orange-400 text-black font-semibold text-sm py-2 rounded-full transition"
+              >
+                Save Size
+              </button>
+            </div>
+
             <button
               onClick={() => setQrProject(null)}
               className="mt-4 w-full text-neutral-400 hover:text-white text-sm"
