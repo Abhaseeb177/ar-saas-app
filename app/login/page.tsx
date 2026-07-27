@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
+import { friendlyError } from '@/lib/errors'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -25,7 +26,7 @@ export default function LoginPage() {
     setLoading(false)
 
     if (error) {
-      setMessage(error.message)
+      setMessage(friendlyError(error.message))
     } else {
       router.push('/dashboard')
       router.refresh()

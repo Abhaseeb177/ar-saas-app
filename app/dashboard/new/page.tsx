@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
+import { friendlyError } from '@/lib/errors'
 import Navbar from '@/components/Navbar'
 
 export default function NewDishPage() {
@@ -70,7 +71,7 @@ export default function NewDishPage() {
       })
 
     if (modelUploadError) {
-      setError(modelUploadError.message)
+      setError(friendlyError(modelUploadError.message))
       setUploading(false)
       return
     }
@@ -113,7 +114,7 @@ export default function NewDishPage() {
     setUploading(false)
 
     if (insertError) {
-      setError(insertError.message)
+      setError(friendlyError(insertError.message))
       return
     }
 

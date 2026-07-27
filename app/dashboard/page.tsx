@@ -21,10 +21,14 @@ type Profile = {
   plan: string
   scan_limit: number
 }
+type ScanCount = {
+  project_id: string
+}
 
 export default function DashboardPage() {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [projects, setProjects] = useState<Project[]>([])
+  const [totalScans, setTotalScans] = useState(0)
   const [loading, setLoading] = useState(true)
   const [qrProject, setQrProject] = useState<Project | null>(null)
   useEffect(() => {
@@ -59,8 +63,20 @@ export default function DashboardPage() {
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
 
+      // Count total scans across all of this user's dishes
+      let scanCount = 0
+      if (projectsData && projectsData.length > 0) {
+        const projectIds = projectsData.map((p) => p.id)
+        const { count } = await supabase
+          .from('scans')
+          .select('*', { count: 'exact', head: true })
+          .in('project_id', projectIds)
+        scanCount = count || 0
+      }
+
       setProfile(profileData)
       setProjects(projectsData || [])
+      setTotalScans(scanCount)
       setLoading(false)
     }
 
@@ -106,9 +122,9 @@ export default function DashboardPage() {
             </p>
           </div>
           <div className="sm:text-right">
-            <p className="text-neutral-400 text-sm">Monthly Scan Limit</p>
+            <p className="text-neutral-400 text-sm">Scans Used</p>
             <p className="text-white font-semibold text-lg">
-              {profile?.scan_limit ?? 100} scans
+              {totalScans} <span className="text-neutral-500 font-normal">/ {profile?.scan_limit ?? 100}</span>
             </p>
           </div>
           {profile?.plan === 'free' && (
@@ -212,9 +228,29 @@ export default function DashboardPage() {
               </button>
             </div>
 
+            <div className="flex gap-3 mt-4">
+              <button
+                onClick={() => router.push(`/dashboard/edit/${qrProject.id}`)}
+                className="flex-1 bg-neutral-800 hover:bg-neutral-700 text-white text-sm font-semibold py-2.5 rounded-full transition"
+              >
+                Edit Dish
+              </button>
+              <button
+                onClick={async () => {
+                  if (!confirm(`Delete "${qrProject.title}"? This cannot be undone.`)) return
+                  const supabase = createClient()
+                  await supabase.from('projects').delete().eq('id', qrProject.id)
+                  setProjects(projects.filter((p) => p.id !== qrProject.id))
+                  window.history.back()
+                }}
+                className="flex-1 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-sm font-semibold py-2.5 rounded-full transition border border-red-500/30"
+              >
+                Delete
+              </button>
+            </div>
             <button
               onClick={() => window.history.back()}
-              className="mt-4 w-full text-neutral-400 hover:text-white text-sm"
+              className="mt-3 w-full text-neutral-400 hover:text-white text-sm"
             >
               Close
             </button>
