@@ -10,12 +10,13 @@ const ModelViewer = 'model-viewer' as unknown as React.FC<{
   'ar-modes'?: string
   'camera-controls'?: boolean
   'auto-rotate'?: boolean
-  'shadow-intensity'?: string
-  exposure?: string
-  'field-of-view'?: string
-  'camera-orbit'?: string
-  'interaction-prompt'?: string
-  scale?: string
+    'shadow-intensity'?: string
+    exposure?: string
+    'field-of-view'?: string
+    'camera-orbit'?: string
+    'interaction-prompt'?: string
+    'ar-scale'?: string
+    scale?: string
   style?: React.CSSProperties
   children?: React.ReactNode
 }>
@@ -79,6 +80,7 @@ export default function ARViewer({
             field-of-view="30deg"
             camera-orbit="0deg 75deg 105%"
             interaction-prompt="none"
+            ar-scale="auto"
             scale={scaleValue}
             style={{
               width: '100%',

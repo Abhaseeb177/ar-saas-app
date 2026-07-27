@@ -13,6 +13,7 @@ type Project = {
   qr_code_url: string | null
   created_at: string
   model_scale?: number
+  photo_url?: string | null
 }
 
 type Profile = {
@@ -47,7 +48,7 @@ export default function DashboardPage() {
 
       const { data: projectsData } = await supabase
         .from('projects')
-        .select('id, title, file_type, qr_code_url, created_at, model_scale')
+        .select('id, title, file_type, qr_code_url, created_at, model_scale, photo_url')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
 
@@ -133,10 +134,18 @@ export default function DashboardPage() {
                 onClick={() => setQrProject(project)}
                 className="bg-neutral-900 border border-neutral-800 rounded-2xl p-5 hover:border-neutral-600 transition cursor-pointer"
               >
-                <div className="w-full h-36 bg-neutral-800 rounded-xl flex items-center justify-center mb-4">
-                  <span className="text-4xl">
-                    {project.file_type === 'model' ? '🧊' : '🖼️'}
-                  </span>
+                <div className="w-full h-36 bg-neutral-800 rounded-xl flex items-center justify-center mb-4 overflow-hidden">
+                  {project.photo_url ? (
+                    <img
+                      src={project.photo_url}
+                      alt={project.title}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-4xl">
+                      {project.file_type === 'model' ? '🧊' : '🖼️'}
+                    </span>
+                  )}
                 </div>
                 <h3 className="text-white font-semibold truncate">{project.title}</h3>
                 <p className="text-neutral-500 text-sm mt-1">
