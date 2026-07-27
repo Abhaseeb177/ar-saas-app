@@ -16,12 +16,15 @@ export default function Navbar({ email }: { email: string }) {
   return (
     <nav className="w-full border-b border-neutral-800 bg-neutral-950/80 backdrop-blur sticky top-0 z-50">
       <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-2">
+        <button
+          onClick={() => router.push('/dashboard')}
+          className="flex items-center gap-2 hover:opacity-80 transition"
+        >
           <span className="text-2xl">🍽️</span>
           <span className="text-white font-bold text-lg tracking-tight">
             Menu<span className="text-orange-500">AR</span>
           </span>
-        </div>
+        </button>
 
         <div className="flex items-center gap-4">
           <span className="text-neutral-400 text-sm hidden sm:block">{email}</span>
