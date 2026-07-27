@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
+import { generatePhotoCardGLB } from '@/lib/generatePhotoCard'
 import { friendlyError } from '@/lib/errors'
 import Navbar from '@/components/Navbar'
 
@@ -58,8 +59,8 @@ export default function NewDishPage() {
     e.preventDefault()
     setError('')
 
-    if (!modelFile) {
-      setError('Please choose a .glb 3D model file.')
+    if (!modelFile && !photo) {
+      setError('Please upload either a .glb 3D model or a dish photo.')
       return
     }
 
@@ -78,11 +79,25 @@ export default function NewDishPage() {
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)/g, '')
 
-    // 1. Upload the 3D model
+    // 1. Get the actual .glb — either the uploaded scan, or an auto-generated photo card
+    let modelBlob: File | Blob = modelFile as File
+    let generatedFromPhoto = false
+
+    if (!modelFile && photo) {
+      try {
+        modelBlob = await generatePhotoCardGLB(photo)
+        generatedFromPhoto = true
+      } catch {
+        setError('Could not process that photo. Please try a different image.')
+        setUploading(false)
+        return
+      }
+    }
+
     const modelFileName = `${user.id}/${safeName}-${Date.now()}.glb`
     const { error: modelUploadError } = await supabase.storage
       .from('dish-models')
-      .upload(modelFileName, modelFile, {
+      .upload(modelFileName, modelBlob, {
         contentType: 'model/gltf-binary',
       })
 
@@ -124,7 +139,7 @@ export default function NewDishPage() {
         price: price ? parseFloat(price) : null,
         file_url: modelUrlData.publicUrl,
         photo_url: photoUrl,
-        file_type: 'model',
+        file_type: generatedFromPhoto ? 'photo-card' : 'model',
         category_id: categoryId || null,
       })
 
@@ -244,7 +259,12 @@ export default function NewDishPage() {
 
           {/* 3D model upload */}
           <div>
-            <label className="block text-sm text-neutral-300 mb-2">3D model file (.glb)</label>
+            <label className="block text-sm text-neutral-300 mb-2">
+              3D model file (.glb) — optional
+            </label>
+            <p className="text-neutral-500 text-xs mb-2">
+              If you skip this, we & apos;ll automatically create a floating photo card from your dish photo instead.
+            </p>
 
             {modelFile ? (
               <div className="flex items-center justify-between bg-neutral-900 border border-neutral-800 rounded-xl px-4 py-4">

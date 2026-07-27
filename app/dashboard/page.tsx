@@ -198,7 +198,7 @@ export default function DashboardPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                {projects.map((project) => (
+                {filteredProjects.map((project) => (
               <div
                 key={project.id}
                 onClick={() => {
